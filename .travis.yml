@@ -1,0 +1,12 @@
+language: java
+
+after_success:
+  - mvn package
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  file: target/gitlab-security-plugin.hpi
+  on:
+    tags: true
+    all_branches: true
