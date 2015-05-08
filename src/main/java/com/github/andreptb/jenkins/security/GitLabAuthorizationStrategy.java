@@ -1,47 +1,33 @@
 package com.github.andreptb.jenkins.security;
 
-import com.github.andreptb.jenkins.security.model.GitLabUserDetails;
+import com.github.andreptb.jenkins.security.model.GitLabACL;
 import hudson.Extension;
 import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.security.AuthorizationStrategy;
-import hudson.security.Permission;
-import org.acegisecurity.Authentication;
-import org.acegisecurity.GrantedAuthority;
-import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 
 public class GitLabAuthorizationStrategy extends AuthorizationStrategy {
 
+    @DataBoundConstructor
+    public GitLabAuthorizationStrategy() {
+
+    }
+
     @Nonnull
     @Override
     public ACL getACL(@Nonnull Job<?, ?> project) {
-        return new ACL() {
-            @Override
-            public boolean hasPermission(@Nonnull Authentication a, @Nonnull Permission permission) {
-                return false;
-            }
-        };
+        return new GitLabACL(project);
     }
 
     @Nonnull
     @Override
     public ACL getRootACL() {
-        return new ACL() {
-            @Override
-            public boolean hasPermission(@Nonnull Authentication a, @Nonnull Permission permission) {
-                GrantedAuthority[] authorities = a.getAuthorities();
-                for(GrantedAuthority authority : authorities) {
-                    if(StringUtils.equals(authority.getAuthority(), GitLabUserDetails.GITLAB_ADMIN)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        };
+        return new GitLabACL(null);
     }
 
     @Nonnull

@@ -1,6 +1,5 @@
 package com.github.andreptb.jenkins.security;
 
-import com.github.andreptb.jenkins.security.model.GitLabUserDetails;
 import hudson.Extension;
 import hudson.model.Descriptor;
 import hudson.security.AbstractPasswordBasedSecurityRealm;
@@ -13,16 +12,15 @@ import org.acegisecurity.AuthenticationException;
 import org.acegisecurity.AuthenticationServiceException;
 import org.acegisecurity.userdetails.UserDetails;
 import org.acegisecurity.userdetails.UsernameNotFoundException;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabSession;
 import org.gitlab.api.models.GitlabUser;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -31,6 +29,7 @@ public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
 
     private String gitLabUrl;
     private String apiToken;
+    private GitLabUserDetailsBuilder userDetailsBuilder = new GitLabUserDetailsBuilder();
 
     @DataBoundConstructor
     public GitLabSecurityRealm(String gitLabUrl, String apiToken) {
@@ -42,7 +41,7 @@ public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
     protected UserDetails authenticate(String username, String password) throws AuthenticationException {
         try {
             GitlabSession session = GitlabAPI.connect(this.gitLabUrl, username, password);
-            return new GitLabUserDetails(session, this.gitLabUrl);
+            return this.userDetailsBuilder.buildUserDetails(this.gitLabUrl, session, session.getPrivateToken());
         } catch (IOException e) {
             throw new AuthenticationServiceException("HTTP request to establish session with GitLab failed", e);
         }
@@ -52,30 +51,24 @@ public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
         GitlabAPI api = GitlabAPI.connect(this.gitLabUrl, this.apiToken);
         try {
-            GitlabUser user = api.retrieve().with("search", username).to(GitlabUser.URL, GitlabUser.class);
-            return new GitLabUserDetails(user, this.gitLabUrl);
+            GitlabUser[] users = api.retrieve().with("search", username).to(GitlabUser.URL, GitlabUser[].class);
+            if(ArrayUtils.isNotEmpty(users)) {
+                return this.userDetailsBuilder.buildUserDetails(this.gitLabUrl, users[0], null);
+            }
+            throw new UsernameNotFoundException("No user found: " + username);
         } catch (IOException e) {
             throw new UsernameNotFoundException("Couldn't find user: " + username, e);
         }
     }
 
     @Override
-    public GroupDetails loadGroupByGroupname(String groupName) throws UsernameNotFoundException, DataAccessException {
-        GitlabAPI api = GitlabAPI.connect(this.gitLabUrl, this.apiToken);
-        try {
-            final GitlabGroup gitlabGroup = api.retrieve().with("search", groupName).to(GitlabGroup.URL, GitlabGroup.class);
-            if (gitlabGroup == null) {
-                throw new UsernameNotFoundException("Group not found", groupName);
+    public GroupDetails loadGroupByGroupname(final String groupName) throws UsernameNotFoundException, DataAccessException {
+        return new GroupDetails() {
+            @Override
+            public String getName() {
+                return groupName;
             }
-            return new GroupDetails() {
-                @Override
-                public String getName() {
-                    return gitlabGroup.getName();
-                }
-            };
-        } catch (IOException e) {
-            throw new InvalidDataAccessApiUsageException("HTTP request to load group '" + groupName + "' failed", e);
-        }
+        };
     }
 
     public String getGitLabUrl() {
@@ -89,7 +82,7 @@ public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
     @Extension
     public static final class DescriptorImpl extends Descriptor<SecurityRealm> {
 
-        public FormValidation doCheckGitLabUrl(@QueryParameter String value) throws IOException, ServletException {
+        public FormValidation doCheckGitLabUrl(@QueryParameter String value) throws IOException, ServletException {markdown-preview://editor/4
             return FormValidation.validateRequired(value);
         }
 
@@ -102,7 +95,7 @@ public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
                 return FormValidation.error("Please inform GitLab's Server URL");
             }
             try {
-                GitlabAPI api = GitlabAPI.connect(gitLabUrl, apiToken);
+                GitlabAPI api = GitlabAPI.connect(gitLabUrl, apiToken).ignoreCertificateErrors(true);
                 GitlabUser userFromToken = api.getCurrentSession();
                 String username = userFromToken.getName();
                 if (!userFromToken.isAdmin()) {
