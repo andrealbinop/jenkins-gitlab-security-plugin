@@ -60,6 +60,10 @@
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
 
+    <build>
+        <finalName>${project.name}</finalName>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.gitlab</groupId>

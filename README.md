@@ -1,4 +1,4 @@
-jenkins-gitlab-security-plugin
+jenkins-gitlab-security-plugin [![Build Status](https://travis-ci.org/andreptb/jenkins-gitlab-security-plugin.svg)](https://travis-ci.org/andreptb/jenkins-gitlab-security-plugin)
 ==============
 
 [Jenkins](https://jenkins-ci.org/) plugin to manage authentication and authorization through [GitLab API](https://github.com/gitlabhq/gitlabhq/tree/master/doc/api).

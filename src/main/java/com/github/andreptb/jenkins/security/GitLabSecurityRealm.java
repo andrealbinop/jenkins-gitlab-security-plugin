@@ -82,7 +82,7 @@ public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
     @Extension
     public static final class DescriptorImpl extends Descriptor<SecurityRealm> {
 
-        public FormValidation doCheckGitLabUrl(@QueryParameter String value) throws IOException, ServletException {markdown-preview://editor/4
+        public FormValidation doCheckGitLabUrl(@QueryParameter String value) throws IOException, ServletException {
             return FormValidation.validateRequired(value);
         }
 
