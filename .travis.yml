@@ -1,8 +1,5 @@
 language: java
 
-after_success:
-  - mvn package
-
 deploy:
   provider: releases
   skip_cleanup: true
