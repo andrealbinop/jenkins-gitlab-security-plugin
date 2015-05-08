@@ -1,9 +1,10 @@
 language: java
-
 deploy:
   provider: releases
-  skip_cleanup: true
+  api_key:
+    secure: edICTNkpZkgyApxiywd4kxj9q0SNa9Zwy7/sfpx7lpLP2d94TsVCX+bmat9QvrT8nf1A9addPGy9ds85IDGYFmdIb8FXw567W7RlwRv22dGJ7gsxB0JLfx6LhtCi8wC6t36moYOZmgt066lY/im/pv3AjPndcA9x3R5vCPL5kIE=
   file: target/gitlab-security-plugin.hpi
   on:
+    repo: andreptb/jenkins-gitlab-security-plugin
     tags: true
     all_branches: true
