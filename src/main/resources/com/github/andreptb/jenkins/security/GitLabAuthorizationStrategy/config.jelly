@@ -23,10 +23,7 @@ THE SOFTWARE.
 -->
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:st="jelly:stapler" xmlns:l="/lib/layout" >
-    <f:entry field="gitLabUrl" title="${%Server URL}">
-        <f:textbox default="${descriptor.getDefaultGitLabUrl()}"/>
-    </f:entry>
-    <f:entry field="apiToken" title="${%API Token}">
-        <f:password autocomplete="off"/>
+    <f:entry field="adminOnly" title="${%Admin requirement}">
+        <f:checkbox/>
     </f:entry>
 </j:jelly>

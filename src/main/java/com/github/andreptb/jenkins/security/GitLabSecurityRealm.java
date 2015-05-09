@@ -8,6 +8,7 @@ import hudson.security.SecurityRealm;
 import hudson.util.FormValidation;
 import hudson.util.Messages;
 import hudson.util.Secret;
+import jenkins.model.GlobalConfiguration;
 import org.acegisecurity.AuthenticationException;
 import org.acegisecurity.AuthenticationServiceException;
 import org.acegisecurity.userdetails.UserDetails;
@@ -26,6 +27,8 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
+
+    private static final String GITLAB_URL_ENV_VAR_KEY = "JENKINS_GITLAB_URL";
 
     private String gitLabUrl;
     private String apiToken;
@@ -107,6 +110,10 @@ public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
             } catch (Exception e) {
                 return FormValidation.error(e, "Connection with GitLab failed");
             }
+        }
+
+        public static String getDefaultGitLabUrl() {
+            return System.getenv(GitLabSecurityRealm.GITLAB_URL_ENV_VAR_KEY);
         }
 
         /**
