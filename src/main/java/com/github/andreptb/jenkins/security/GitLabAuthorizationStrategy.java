@@ -10,6 +10,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Collections;
 
 public class GitLabAuthorizationStrategy extends AuthorizationStrategy {
 
@@ -33,7 +34,7 @@ public class GitLabAuthorizationStrategy extends AuthorizationStrategy {
     @Nonnull
     @Override
     public Collection<String> getGroups() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Extension
