@@ -8,7 +8,6 @@ import hudson.security.SecurityRealm;
 import hudson.util.FormValidation;
 import hudson.util.Messages;
 import hudson.util.Secret;
-import jenkins.model.GlobalConfiguration;
 import org.acegisecurity.AuthenticationException;
 import org.acegisecurity.AuthenticationServiceException;
 import org.acegisecurity.userdetails.UserDetails;
@@ -25,8 +24,12 @@ import org.springframework.dao.DataAccessException;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
+
+    private static Logger LOGGER = Logger.getLogger(GitLabSecurityRealm.class.getName());
 
     private static final String GITLAB_URL_ENV_VAR_KEY = "JENKINS_GITLAB_URL";
 
@@ -43,10 +46,12 @@ public class GitLabSecurityRealm extends AbstractPasswordBasedSecurityRealm {
     @Override
     protected UserDetails authenticate(String username, String password) throws AuthenticationException {
         try {
+            LOGGER.info("Trying to authenticate with username: " + username);
             GitlabSession session = GitlabAPI.connect(this.gitLabUrl, username, password);
             return this.userDetailsBuilder.buildUserDetails(this.gitLabUrl, session, session.getPrivateToken());
-        } catch (IOException e) {
-            throw new AuthenticationServiceException("HTTP request to establish session with GitLab failed", e);
+        } catch(Exception e) {
+            this.LOGGER.log(Level.WARNING, "Authentication request failed for username: " + username, e);
+            throw new AuthenticationServiceException("Unable to process authentication for username: " + username, e);
         }
     }
 
