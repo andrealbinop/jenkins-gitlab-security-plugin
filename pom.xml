@@ -11,7 +11,7 @@
     <groupId>com.github.andreptb</groupId>
     <artifactId>gitlab-security-plugin</artifactId>
     <packaging>hpi</packaging>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <description>Jenkins plugins to manage authentication and authorization through Gitlab.</description>
     <url>https://github.com/andreptb/jenkins-gitlab-security-plugin</url>
 
