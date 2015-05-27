@@ -3,9 +3,6 @@ package com.github.andreptb.jenkins.security.com.github.andreptb.gitlab;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.gitlab.api.models.GitlabAccessLevel;
 
-/**
- * Created by andre on 06/05/15.
- */
 public class GitLabProjectPermission {
 
     @JsonProperty("access_level")

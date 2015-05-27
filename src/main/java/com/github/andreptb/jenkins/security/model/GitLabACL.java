@@ -12,9 +12,6 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.Set;
 
-/**
- * Created by Andre on 03/05/2015.
- */
 public class GitLabACL extends ACL {
 
     private Project<?, ?> project;
@@ -27,6 +24,9 @@ public class GitLabACL extends ACL {
 
     @Override
     public boolean hasPermission(Authentication a, Permission permission) {
+        if(ACL.SYSTEM_USERNAME.equals(a.getName())) {
+            return true;
+        }
         GrantedAuthority[] authorities = a.getAuthorities();
         if(ArrayUtils.isEmpty(authorities)) {
             return false;
